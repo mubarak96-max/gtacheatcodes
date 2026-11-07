@@ -1,0 +1,77 @@
+---
+import Base from '../layouts/Base.astro';
+import { totalCheats } from '../data/games';
+import { SITE } from '../lib/site';
+const total = totalCheats();
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'AboutPage', name: `About ${SITE.name}`, url: new URL('/about/', Astro.site).href },
+];
+---
+
+<Base
+  title="About GTA Cheat Codes & How We Check Codes"
+  description="Who runs GTA Cheat Codes, how every cheat is sourced and checked, how PlayStation combos are converted to Xbox and Switch, and how to report a wrong code."
+  schema={schema}
+>
+  <article class="wrap page">
+    <p class="kicker">About & methodology</p>
+    <h1 class="display">Built by players, <span class="grad-text">for players</span></h1>
+    <div class="prose">
+      <p>
+        {SITE.name} is an independent fan resource for Grand Theft Auto cheat codes. We cover GTA 5, San Andreas, Vice City,
+        GTA 4, GTA 3, the Definitive Edition trilogy and the handheld spin-offs, and we keep a page tracking GTA 6. The
+        structured database currently holds {total} codes.
+      </p>
+      <h2>How codes are sourced and checked</h2>
+      <p>
+        Every cheat for GTA 5, San Andreas, Vice City, GTA 4 and GTA 3 lives in one structured database. Each entry stores
+        the PlayStation button sequence, the PC code and any phone number. The tables, the Cheat Finder, the Combo Trainer
+        and the Cheat Roulette all read from it, so a code can't say one thing on one page and something else on another.
+      </p>
+      <p>
+        Codes are cross-checked against long-standing community references. Where a code differs between releases, or a
+        console version couldn't be confirmed, the entry says so or leaves the console code out instead of guessing. Codes
+        for Liberty City Stories, Vice City Stories and Chinatown Wars were checked against at least two independent
+        references.
+      </p>
+      <h2>How Xbox and Switch combos are generated</h2>
+      <p>The games map cheats button for button across controllers. We store the PlayStation sequence and convert it:</p>
+      <ul>
+        <li><strong>Xbox:</strong> Cross → A, Circle → B, Square → X, Triangle → Y, L1 → LB, R1 → RB, L2 → LT, R2 → RT.</li>
+        <li>
+          <strong>Switch (Definitive Edition):</strong> Cross → B, Circle → A, Square → Y, Triangle → X, L1 → L, R1 → R, L2 → ZL,
+          R2 → ZR.
+        </li>
+      </ul>
+      <h2>What we will never do</h2>
+      <ul>
+        <li>
+          Publish "GTA Online cheats", money generators or mod menus. Single-player cheats don't work online, and tools
+          that claim otherwise are scams or get accounts banned.
+        </li>
+        <li>Invent codes for unreleased games. The GTA 6 page only reports what has been confirmed.</li>
+      </ul>
+      <h2>Found a wrong code?</h2>
+      <p>
+        If a code doesn't work on your copy, note the game, the platform and the version (original, remaster or Definitive
+        Edition). Release differences are the most common cause, and we'll update the entry.
+      </p>
+      <h2>Not affiliated</h2>
+      <p>
+        Grand Theft Auto, Rockstar Games and all related names and marks belong to Take-Two Interactive Software. This site
+        is not affiliated with or endorsed by them.
+      </p>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .page {
+    padding-top: 48px;
+  }
+  h1 {
+    font-size: clamp(44px, 6.5vw, 80px);
+    margin: 12px 0 10px;
+    max-width: 16ch;
+  }
+</style>

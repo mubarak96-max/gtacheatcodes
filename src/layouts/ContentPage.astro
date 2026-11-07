@@ -1,0 +1,457 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from './Base.astro';
+import CheatExplorer from '../components/react/CheatExplorer';
+import CheatTrainer from '../components/react/CheatTrainer';
+import CheatRoulette from '../components/react/CheatRoulette';
+import { SITE, pageUrl } from '../lib/site';
+import { GAMES } from '../data/games';
+import type { GameKey } from '../data/types';
+
+interface Props {
+  entry: CollectionEntry<'pages'>;
+}
+
+const { entry } = Astro.props;
+const d = entry.data;
+const { Content, headings } = await render(entry);
+
+const TOPIC_ACCENT: Record<string, string> = {
+  gta5: GAMES.gta5.accent,
+  sa: GAMES.sa.accent,
+  vc: GAMES.vc.accent,
+  gta3: GAMES.gta3.accent,
+  gta4: GAMES.gta4.accent,
+  lcs: '#ff9f43',
+  vcs: '#ff6fb5',
+  ctw: '#ff4848',
+  de: '#9b7bff',
+  gta6: '#ff3fa4',
+  online: '#29e0ff',
+  general: '#ff2e88',
+};
+const accent = TOPIC_ACCENT[d.topic] ?? '#ff2e88';
+
+const words = (entry.body ?? '').split(/\s+/).filter(Boolean).length;
+const minutes = Math.max(3, Math.round(words / 230));
+const url = new URL(pageUrl(d.kind, entry.id), Astro.site).href;
+
+const all = await getCollection('pages');
+const related = d.related
+  .map((slug) => all.find((p) => p.id === slug))
+  .filter((p): p is CollectionEntry<'pages'> => !!p);
+
+const section =
+  d.kind === 'hub'
+    ? { name: 'Cheats', href: '/' }
+    : d.kind === 'guide'
+      ? { name: 'Guides', href: '/guides/' }
+      : { name: 'Tools', href: '/tools/cheat-finder/' };
+const crumbs = [
+  { name: 'Home', href: '/' },
+  ...(d.kind === 'hub' ? [] : [section]),
+  { name: d.title.split(':')[0], href: pageUrl(d.kind, entry.id) },
+];
+
+const toc = headings.filter((h) => h.depth === 2);
+const fmtDate = (dt: Date) =>
+  dt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+
+const gameEntity = (k: GameKey) => ({
+  '@type': 'VideoGame',
+  name: GAMES[k].name,
+  datePublished: String(GAMES[k].year),
+  publisher: { '@type': 'Organization', name: 'Rockstar Games' },
+});
+
+const schema: Record<string, unknown>[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': d.kind === 'tool' ? 'WebApplication' : 'Article',
+    ...(d.kind === 'tool'
+      ? {
+          name: d.title,
+          applicationCategory: 'GameApplication',
+          operatingSystem: 'Any (web browser)',
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+          url,
+          description: d.description,
+        }
+      : {
+          headline: d.title,
+          description: d.description,
+          datePublished: d.publishDate.toISOString(),
+          dateModified: d.updatedDate.toISOString(),
+          wordCount: words,
+          mainEntityOfPage: url,
+          image: new URL('/og.png', Astro.site).href,
+          author: { '@type': 'Organization', name: SITE.author, url: new URL('/about/', Astro.site).href },
+          publisher: {
+            '@type': 'Organization',
+            name: SITE.name,
+            logo: { '@type': 'ImageObject', url: new URL('/favicon.svg', Astro.site).href },
+          },
+          ...(d.cheatGames ? { about: d.cheatGames.map(gameEntity) } : {}),
+          speakable: { '@type': 'SpeakableSpecification', cssSelector: ['.quick-answer', 'h1'] },
+        }),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.name,
+      item: new URL(c.href, Astro.site).href,
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: d.faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+];
+---
+
+<Base
+  title={d.seoTitle}
+  description={d.description}
+  schema={schema}
+  ogType={d.kind === 'tool' ? 'website' : 'article'}
+  accent={accent}
+  publishDate={d.publishDate}
+  updatedDate={d.updatedDate}
+>
+  <article class="page" style={`--accent:${accent}`}>
+    <header class="hero">
+      <div class="wrap">
+        <nav class="crumbs" aria-label="Breadcrumb">
+          <ol>
+            {
+              crumbs.map((c, i) => (
+                <li>
+                  {i < crumbs.length - 1 ? <a href={c.href}>{c.name}</a> : <span aria-current="page">{c.name}</span>}
+                </li>
+              ))
+            }
+          </ol>
+        </nav>
+        <p class="kicker">{d.kicker}</p>
+        <h1 class="display">{d.title}</h1>
+        <p class="lede">{d.description}</p>
+        <div class="byline">
+          <span>By <a href="/about/">{SITE.author}</a></span>
+          <span>Updated <time datetime={d.updatedDate.toISOString()}>{fmtDate(d.updatedDate)}</time></span>
+          <span>{minutes} min read</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <section class="answer-grid">
+        <div class="quick-answer">
+          <p class="qa-label">Quick answer</p>
+          <p>{d.quickAnswer}</p>
+        </div>
+        <div class="takeaways">
+          <p class="qa-label">Key takeaways</p>
+          <ul>{d.keyTakeaways.map((k) => <li>{k}</li>)}</ul>
+        </div>
+      </section>
+
+      {d.tool === 'finder' && <CheatExplorer client:load games={['gta5', 'sa', 'vc', 'gta4', 'gta3']} />}
+      {d.tool === 'trainer' && <CheatTrainer client:load />}
+      {d.tool === 'roulette' && <CheatRoulette client:load />}
+      {
+        d.cheatGames && (
+          <CheatExplorer
+            client:visible
+            games={d.cheatGames}
+            category={d.cheatCategory}
+            defaultPlatform={d.defaultPlatform}
+          />
+        )
+      }
+
+      <div class="layout">
+        <div class="prose">
+          <Content />
+        </div>
+        {
+          toc.length > 2 && (
+            <aside class="toc" aria-label="On this page">
+              <p class="qa-label">On this page</p>
+              <ol>
+                {toc.map((h) => (
+                  <li>
+                    <a href={`#${h.slug}`}>{h.text}</a>
+                  </li>
+                ))}
+              </ol>
+              <a class="btn btn-primary toc-cta" href="/tools/cheat-trainer/">
+                Practice combos
+              </a>
+            </aside>
+          )
+        }
+      </div>
+
+      <section class="faq" aria-labelledby="faq-h">
+        <h2 id="faq-h" class="display">Frequently asked questions</h2>
+        {
+          d.faqs.map((f, i) => (
+            <details open={i === 0}>
+              <summary>
+                <h3>{f.q}</h3>
+              </summary>
+              <p>{f.a}</p>
+            </details>
+          ))
+        }
+      </section>
+
+      {
+        related.length > 0 && (
+          <section class="related" aria-labelledby="rel-h">
+            <h2 id="rel-h" class="display">Keep reading</h2>
+            <div class="rel-grid">
+              {related.map((r) => (
+                <a class="rel-card" href={pageUrl(r.data.kind, r.id)} style={`--accent:${TOPIC_ACCENT[r.data.topic]}`}>
+                  <span class="kicker">{r.data.kicker}</span>
+                  <strong>{r.data.title}</strong>
+                  <span class="rel-desc">{r.data.description}</span>
+                </a>
+              ))}
+            </div>
+          </section>
+        )
+      }
+    </div>
+  </article>
+</Base>
+
+<style>
+  .hero {
+    padding: 34px 0 30px;
+    border-bottom: 1px solid var(--line);
+    background: radial-gradient(800px 300px at 20% 0, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
+  }
+  .crumbs ol {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--dim);
+  }
+  .crumbs li + li::before {
+    content: '/';
+    margin-right: 6px;
+  }
+  .crumbs a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .hero .kicker {
+    color: var(--accent);
+  }
+  h1 {
+    margin: 12px 0 16px;
+    max-width: 24ch;
+    font-size: clamp(38px, 5.6vw, 68px);
+  }
+  .lede {
+    max-width: 720px;
+    font-size: 19px;
+    color: #cfcee0;
+    margin: 0 0 18px;
+  }
+  .byline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font-size: 13.5px;
+    color: var(--dim);
+  }
+  .byline a {
+    color: var(--muted);
+  }
+  .answer-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 14px;
+    margin-top: 28px;
+  }
+  .quick-answer,
+  .takeaways {
+    padding: 20px 22px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--panel);
+  }
+  .quick-answer p:last-child {
+    margin: 0;
+    font-size: 17px;
+  }
+  .qa-label {
+    margin: 0 0 8px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .takeaways ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 15px;
+  }
+  .takeaways li {
+    margin: 5px 0;
+  }
+  .takeaways li::marker {
+    color: var(--accent);
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 56px;
+    margin-top: 20px;
+  }
+  .toc {
+    position: sticky;
+    top: 90px;
+    align-self: start;
+    padding: 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--panel);
+    font-size: 14px;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+  }
+  .toc ol {
+    margin: 0;
+    padding-left: 18px;
+  }
+  .toc li {
+    margin: 7px 0;
+    color: var(--dim);
+  }
+  .toc a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .toc a:hover {
+    color: #fff;
+  }
+  .toc-cta {
+    width: 100%;
+    margin-top: 16px;
+    font-size: 14px;
+  }
+  .faq {
+    max-width: 860px;
+    margin-top: 70px;
+  }
+  .faq h2,
+  .related h2 {
+    font-size: clamp(30px, 4vw, 42px);
+    margin: 0 0 18px;
+  }
+  .faq details {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel);
+    margin-bottom: 10px;
+  }
+  .faq summary {
+    cursor: pointer;
+    padding: 16px 20px;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq summary::after {
+    content: '+';
+    font-size: 22px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .faq details[open] summary::after {
+    content: '−';
+  }
+  .faq h3 {
+    margin: 0;
+    font-size: 17px;
+  }
+  .faq details p {
+    margin: 0;
+    padding: 0 20px 18px;
+    color: #cfcee0;
+  }
+  .related {
+    margin-top: 70px;
+  }
+  .rel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .rel-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text);
+    text-decoration: none;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .rel-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--line-2);
+    color: var(--text);
+  }
+  .rel-card .kicker {
+    color: var(--accent);
+    font-size: 11px;
+  }
+  .rel-card strong {
+    font-size: 17px;
+    line-height: 1.3;
+  }
+  .rel-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  @media (max-width: 1020px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .toc {
+      display: none;
+    }
+  }
+  @media (max-width: 760px) {
+    .answer-grid {
+      grid-template-columns: 1fr;
+    }
+    .lede {
+      font-size: 17px;
+    }
+  }
+</style>

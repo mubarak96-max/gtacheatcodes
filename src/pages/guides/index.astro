@@ -1,0 +1,125 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { pageUrl } from '../../lib/site';
+
+const pages = await getCollection('pages');
+const groups: { title: string; topics: string[] }[] = [
+  { title: 'GTA 5', topics: ['gta5', 'online'] },
+  { title: 'San Andreas', topics: ['sa'] },
+  { title: 'Vice City, GTA 4 & GTA 3', topics: ['vc', 'gta4', 'gta3'] },
+  { title: 'Every GTA', topics: ['general', 'de', 'gta6', 'lcs', 'vcs', 'ctw'] },
+];
+const guides = pages.filter((p) => p.data.kind === 'guide');
+const hubs = pages.filter((p) => p.data.kind === 'hub');
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'GTA cheat guides',
+    hasPart: guides.map((g) => ({
+      '@type': 'Article',
+      headline: g.data.title,
+      url: new URL(pageUrl('guide', g.id), Astro.site).href,
+    })),
+  },
+];
+---
+
+<Base
+  title="GTA Cheat Guides: Tips, Money, Saves & Platform Help"
+  description="Every GTA cheat guide in one place: phone cheats, PC console codes, money myths, save-breaking cheats, trophies, GTA Online and the history of cheat codes."
+  schema={schema}
+>
+  <section class="wrap head">
+    <p class="kicker">The library</p>
+    <h1 class="display">Guides &amp; <span class="grad-text">deep dives</span></h1>
+    <p class="lede">The cheat tables tell you what to press. These guides tell you when, why and what can go wrong.</p>
+  </section>
+  {
+    groups.map((g) => {
+      const list = guides.filter((p) => g.topics.includes(p.data.topic));
+      return list.length ? (
+        <section class="wrap group">
+          <h2 class="display">{g.title}</h2>
+          <div class="grid">
+            {list.map((p) => (
+              <a class="card" href={pageUrl('guide', p.id)}>
+                <span class="kicker">{p.data.kicker}</span>
+                <strong>{p.data.title}</strong>
+                <span>{p.data.description}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      ) : null;
+    })
+  }
+  <section class="wrap group">
+    <h2 class="display">Full cheat lists by game</h2>
+    <div class="grid">
+      {
+        hubs.map((p) => (
+          <a class="card" href={pageUrl('hub', p.id)}>
+            <span class="kicker">{p.data.kicker}</span>
+            <strong>{p.data.title}</strong>
+            <span>{p.data.description}</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head {
+    padding-top: 48px;
+  }
+  h1 {
+    font-size: clamp(48px, 7vw, 88px);
+    margin: 12px 0;
+  }
+  .lede {
+    color: var(--muted);
+    font-size: 19px;
+    max-width: 640px;
+  }
+  .group {
+    margin-top: 56px;
+  }
+  .group h2 {
+    font-size: 38px;
+    margin: 0 0 18px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+    gap: 12px;
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: var(--line-2);
+    color: var(--muted);
+  }
+  .card strong {
+    color: var(--text);
+    font-size: 17px;
+    line-height: 1.3;
+  }
+  .card .kicker {
+    font-size: 11px;
+  }
+</style>

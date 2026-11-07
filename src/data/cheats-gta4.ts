@@ -1,0 +1,37 @@
+import type { Cheat } from './types';
+
+// GTA IV and Episodes from Liberty City. Every cheat is a phone number dialled
+// on Niko's (or Johnny's / Luis's) in-game phone. Same on every platform.
+export const gta4: Cheat[] = [
+  { id: 'iv-health-armor', name: 'Health & Armor', effect: 'Restores health and armor and repairs your car.', category: 'health', phone: '482-555-0100', popular: true },
+  { id: 'iv-health-armor-ammo', name: 'Health, Armor & Ammo', effect: 'Restores health and armor and refills ammo.', category: 'health', phone: '362-555-0100', popular: true },
+  { id: 'iv-weapons-1', name: 'Weapon Set 1', effect: 'Baseball bat, Molotovs, pistol, shotgun, Micro SMG, assault rifle, sniper rifle, RPG.', category: 'weapons', phone: '486-555-0150', popular: true },
+  { id: 'iv-weapons-2', name: 'Weapon Set 2', effect: 'Knife, grenades, Desert Eagle, combat shotgun, SMG, carbine rifle, combat sniper, RPG.', category: 'weapons', phone: '486-555-0100', popular: true },
+  { id: 'iv-remove-wanted', name: 'Remove Wanted Level', effect: 'Clears all wanted stars.', category: 'wanted', phone: '267-555-0100', popular: true },
+  { id: 'iv-raise-wanted', name: 'Raise Wanted Level', effect: 'Adds a wanted star.', category: 'wanted', phone: '267-555-0150' },
+  { id: 'iv-weather', name: 'Change Weather', effect: 'Cycles the weather.', category: 'world', phone: '468-555-0100' },
+  { id: 'iv-song', name: 'Song Information', effect: 'Shows the title and artist of the song on the radio.', category: 'world', phone: '948-555-0100' },
+  { id: 'iv-annihilator', name: 'Spawn Annihilator', effect: 'Spawns an armed Annihilator helicopter.', category: 'vehicles', phone: '359-555-0100', popular: true },
+  { id: 'iv-cognoscenti', name: 'Spawn Cognoscenti', effect: 'Spawns a Cognoscenti luxury sedan.', category: 'vehicles', phone: '227-555-0142' },
+  { id: 'iv-comet', name: 'Spawn Comet', effect: 'Spawns a Comet sports car.', category: 'vehicles', phone: '227-555-0175' },
+  { id: 'iv-fib-buffalo', name: 'Spawn FIB Buffalo', effect: 'Spawns an unmarked FIB Buffalo.', category: 'vehicles', phone: '227-555-0100' },
+  { id: 'iv-jetmax', name: 'Spawn Jetmax', effect: 'Spawns a Jetmax speedboat (near water).', category: 'vehicles', phone: '938-555-0100' },
+  { id: 'iv-nrg', name: 'Spawn NRG 900', effect: 'Spawns an NRG 900 sport bike.', category: 'vehicles', phone: '625-555-0100' },
+  { id: 'iv-sanchez', name: 'Spawn Sanchez', effect: 'Spawns a Sanchez dirt bike.', category: 'vehicles', phone: '625-555-0150' },
+  { id: 'iv-supergt', name: 'Spawn Super GT', effect: 'Spawns a Super GT sports car.', category: 'vehicles', phone: '227-555-0168' },
+  { id: 'iv-turismo', name: 'Spawn Turismo', effect: 'Spawns a Turismo supercar.', category: 'vehicles', phone: '227-555-0147' },
+  { id: 'tlad-burrito', name: 'Spawn Burrito (TLAD)', effect: 'Spawns a gang Burrito van.', category: 'vehicles', phone: '826-555-0150', note: 'The Lost and Damned only.' },
+  { id: 'tlad-doublet', name: 'Spawn Double T (TLAD)', effect: 'Spawns a Double T motorcycle.', category: 'vehicles', phone: '245-555-0125', note: 'The Lost and Damned only.' },
+  { id: 'tlad-hakuchou', name: 'Spawn Hakuchou (TLAD)', effect: 'Spawns a Hakuchou superbike.', category: 'vehicles', phone: '245-555-0199', note: 'The Lost and Damned only.' },
+  { id: 'tlad-hexer', name: 'Spawn Hexer (TLAD)', effect: 'Spawns a Hexer chopper.', category: 'vehicles', phone: '245-555-0150', note: 'The Lost and Damned only.' },
+  { id: 'tlad-innovation', name: 'Spawn Innovation (TLAD)', effect: 'Spawns an Innovation chopper.', category: 'vehicles', phone: '245-555-0100', note: 'The Lost and Damned only.' },
+  { id: 'tlad-slamvan', name: 'Spawn Slamvan (TLAD)', effect: 'Spawns a Slamvan.', category: 'vehicles', phone: '826-555-0100', note: 'The Lost and Damned only.' },
+  { id: 'tbogt-apc', name: 'Spawn APC (TBoGT)', effect: 'Spawns an armored personnel carrier.', category: 'vehicles', phone: '272-555-8265', note: 'The Ballad of Gay Tony only.', popular: true },
+  { id: 'tbogt-buzzard', name: 'Spawn Buzzard (TBoGT)', effect: 'Spawns a Buzzard attack helicopter.', category: 'vehicles', phone: '359-555-2899', note: 'The Ballad of Gay Tony only.' },
+  { id: 'tbogt-bulletgt', name: 'Spawn Bullet GT (TBoGT)', effect: 'Spawns a Bullet GT supercar.', category: 'vehicles', phone: '227-555-9666', note: 'The Ballad of Gay Tony only.' },
+  { id: 'tbogt-akuma', name: 'Spawn Akuma (TBoGT)', effect: 'Spawns an Akuma sport bike.', category: 'vehicles', phone: '625-555-0150', note: 'The Ballad of Gay Tony only (replaces the Sanchez number).' },
+  { id: 'tbogt-vader', name: 'Spawn Vader (TBoGT)', effect: 'Spawns a Vader sport bike.', category: 'vehicles', phone: '625-555-3273', note: 'The Ballad of Gay Tony only.' },
+  { id: 'tbogt-parachute', name: 'Give Parachute (TBoGT)', effect: 'Equips a parachute.', category: 'player', phone: '359-555-7272', note: 'The Ballad of Gay Tony only.' },
+  { id: 'tbogt-explosive', name: 'Explosive Sniper Rounds (TBoGT)', effect: 'Sniper rounds and punches become explosive.', category: 'weapons', phone: '486-555-2526', note: 'The Ballad of Gay Tony only.' },
+  { id: 'tbogt-superpunch', name: 'Super Punch (TBoGT)', effect: 'Your punches send enemies flying.', category: 'weapons', phone: '276-555-2666', note: 'The Ballad of Gay Tony only.' },
+];

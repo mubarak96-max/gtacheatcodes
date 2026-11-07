@@ -1,11 +1,679 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ButtonSeq from '../components/react/ButtonSeq';
+import { CHEATS, GAMES, GAME_ORDER, totalCheats } from '../data/games';
+import { SITE, pageUrl } from '../lib/site';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const pages = await getCollection('pages');
+const guides = pages
+  .filter((p) => p.data.kind === 'guide')
+  .sort((a, b) => b.data.updatedDate.getTime() - a.data.updatedDate.getTime() || a.data.title.localeCompare(b.data.title));
+const total = totalCheats();
+
+const featured = [
+  { game: 'sa', id: 'hesoyam' },
+  { game: 'gta5', id: 'painkiller' },
+  { game: 'sa', id: 'yecgaa' },
+  { game: 'vc', id: 'panzer' },
+  { game: 'gta5', id: 'buzzoff' },
+  { game: 'gta4', id: 'iv-annihilator' },
+] as const;
+const featuredCheats = featured.map((f) => ({
+  ...f,
+  cheat: CHEATS[f.game].find((c) => c.id === f.id)!,
+  meta: GAMES[f.game],
+}));
+
+const moreGames = [
+  { href: '/gta-trilogy-definitive-edition-cheats/', name: 'Definitive Edition', sub: 'Trilogy remaster, incl. Switch' },
+  { href: '/gta-liberty-city-stories-cheats/', name: 'Liberty City Stories', sub: 'PSP & PS2 combos' },
+  { href: '/gta-vice-city-stories-cheats/', name: 'Vice City Stories', sub: 'PSP & PS2 combos' },
+  { href: '/gta-chinatown-wars-cheats/', name: 'Chinatown Wars', sub: 'DS, PSP & mobile' },
+  { href: '/gta-6-cheats/', name: 'GTA 6', sub: 'What we know so far' },
+];
+
+const tools = [
+  { href: '/tools/cheat-finder/', icon: '⌕', name: 'Cheat Finder', text: `Search all ${total} codes by name, effect or the code itself. Switch platforms in one tap.` },
+  { href: '/tools/cheat-trainer/', icon: '🎮', name: 'Combo Trainer', text: 'Practise 16-button combos against the clock with your keyboard, the on-screen pad or a real controller.' },
+  { href: '/tools/cheat-roulette/', icon: '🎰', name: 'Cheat Roulette', text: 'Spin for a random cheat and a chaos challenge. Perfect for streams and couch sessions.' },
+];
+
+const homeFaqs = [
+  { q: 'What is the most famous GTA cheat code?', a: 'HESOYAM from GTA San Andreas is the most famous GTA cheat. Typed on PC (or entered as R1, R2, L1, X, Left, Down, Right, Up, Left, Down, Right, Up on PlayStation) it restores health and armor, repairs your vehicle and adds $250,000.' },
+  { q: 'Do GTA cheats work in GTA Online?', a: 'No. Cheat codes only work in single-player story modes. GTA Online ignores them, and using mod menus or third-party cheats online can get your account banned.' },
+  { q: 'Is there a money cheat in GTA 5?', a: 'No. GTA 5 has no money cheat on any platform. The only classic games with direct money cheats are GTA III (IFIWEREARICHMAN) and San Andreas (HESOYAM).' },
+  { q: 'Do cheats disable trophies and achievements?', a: 'In GTA 5 and GTA IV, entering a cheat disables trophies and achievements for that play session. In the Definitive Edition trilogy, using cheats also blocks achievements. Load a save without cheats to earn them again.' },
+];
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE.name,
+    url: Astro.site!.href,
+    description: SITE.description,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: new URL('/tools/cheat-finder/?q={search_term_string}', Astro.site).href },
+      'query-input': 'required name=search_term_string',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE.name,
+    url: Astro.site!.href,
+    logo: new URL('/favicon.svg', Astro.site).href,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: homeFaqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<Base title="GTA Cheat Codes for GTA 5, San Andreas, Vice City & More" description={SITE.description} schema={schema}>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="kicker">{total} verified codes · 5 platforms · 0 fluff</p>
+        <h1 class="display">
+          Every GTA cheat.<br /><span class="grad-text">Every platform.</span>
+        </h1>
+        <p class="lede">
+          Button combos, PC codes and phone numbers for GTA 5, San Andreas, Vice City, GTA 4 and GTA 3, with each code
+          drawn as the buttons you actually press on PlayStation, Xbox or Switch.
+        </p>
+        <form class="hero-search" action="/tools/cheat-finder/" method="get" role="search">
+          <label for="hq" class="sr-only">Search every GTA cheat</label>
+          <input id="hq" name="q" type="search" placeholder="Try “jetpack”, “tank” or “1-999”" autocomplete="off" />
+          <button class="btn btn-primary" type="submit">Find cheat</button>
+        </form>
+        <p class="hint">Psst, type <kbd>HESOYAM</kbd> or <kbd>PANZER</kbd> anywhere on this page.</p>
+      </div>
+
+      <div class="demo" aria-hidden="true">
+        <div class="demo-screen">
+          <div class="demo-hud">
+            <span class="demo-money">$000250000</span>
+            <span class="demo-stars">★★★★★</span>
+          </div>
+          <p class="demo-label">San Andreas · PlayStation</p>
+          <p class="demo-name">Health, Armor &amp; $250K</p>
+          <div class="demo-seq">
+            <ButtonSeq seq="R1 R2 L1 X L D R U L D R U" platform="ps" />
+          </div>
+          <p class="demo-done">Cheat activated</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap block">
+    <div class="block-head">
+      <h2 class="display">Pick your city</h2>
+      <a href="/tools/cheat-finder/">Search all games →</a>
+    </div>
+    <div class="games">
+      {
+        GAME_ORDER.map((k) => {
+          const g = GAMES[k];
+          return (
+            <a class="game" href={g.hub} style={`--gx:${g.accent}`}>
+              <span class="game-year">{g.year} · {g.city}</span>
+              <span class="game-name display">{g.short}</span>
+              <span class="game-blurb">{g.blurb}</span>
+              <span class="game-foot">
+                <strong>{CHEATS[k].length} cheats</strong>
+                <span>{g.platforms.length > 1 ? `${g.platforms.length} platforms` : 'Phone codes'}</span>
+              </span>
+            </a>
+          );
+        })
+      }
+    </div>
+    <div class="more-games">
+      {
+        moreGames.map((m) => (
+          <a href={m.href}>
+            <strong>{m.name}</strong>
+            <span>{m.sub}</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="wrap block">
+    <div class="block-head">
+      <h2 class="display">Legendary codes</h2>
+      <a href="/guides/best-gta-cheats-of-all-time/">The all-time top list →</a>
+    </div>
+    <div class="feat">
+      {
+        featuredCheats.map((f) => (
+          <a class="feat-card" href={`${f.meta.hub}#${f.game}-${f.cheat.id}`} style={`--gx:${f.meta.accent}`}>
+            <span class="feat-game">{f.meta.short}</span>
+            <strong>{f.cheat.name}</strong>
+            <span class="feat-eff">{f.cheat.effect}</span>
+            <span class="feat-code">
+              {f.cheat.ps ? <ButtonSeq seq={f.cheat.ps} platform="ps" small /> : <code class="code-phone">{f.cheat.phone}</code>}
+            </span>
+            {f.cheat.pc && (
+              <span class="feat-pc">
+                PC: <code class="code-pc">{f.cheat.pc}</code>
+              </span>
+            )}
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="wrap block">
+    <div class="block-head">
+      <h2 class="display">Tools for cheaters</h2>
+    </div>
+    <div class="tools">
+      {
+        tools.map((t) => (
+          <a class="tool" href={t.href}>
+            <span class="tool-icon">{t.icon}</span>
+            <strong class="display">{t.name}</strong>
+            <span>{t.text}</span>
+            <span class="tool-go">Open →</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="wrap block">
+    <div class="block-head">
+      <h2 class="display">Guides &amp; deep dives</h2>
+      <a href="/guides/">All {guides.length} guides →</a>
+    </div>
+    <div class="guides">
+      {
+        guides.slice(0, 9).map((g) => (
+          <a class="guide" href={pageUrl('guide', g.id)}>
+            <span class="kicker">{g.data.kicker}</span>
+            <strong>{g.data.title}</strong>
+            <span>{g.data.description}</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="wrap block intro">
+    <div class="prose">
+      <h2>How GTA cheat codes work</h2>
+      <p>
+        Every mainline Grand Theft Auto game since GTA III has hidden cheat codes in its single-player mode. How you
+        enter them depends on the game. In <a href="/gta-3-cheats/">GTA III</a>,
+        <a href="/gta-vice-city-cheats/">Vice City</a> and <a href="/gta-san-andreas-cheats/">San Andreas</a> you press
+        a button sequence on a controller, or type a word on a PC keyboard during gameplay. In
+        <a href="/gta-4-cheats/">GTA IV</a> you dial a phone number on Niko's cellphone. <a href="/gta-5-cheats/"
+          >GTA 5</a
+        > supports all three: controller combos, the PC console opened with the ~ key, and 1-999 numbers on the in-game
+        phone.
+      </p>
+      <p>
+        Cheats only work in story mode. They do nothing in GTA Online, and in GTA 5 and GTA IV entering one turns off
+        trophies and achievements for that session. A few cheats, like freezing time or starting a pedestrian riot, can
+        also make missions impossible if you save while they are active, so keep a clean backup save. Our guide to
+        <a href="/guides/do-cheats-disable-saves-gta/">whether cheats disable saves</a> covers it game by game.
+      </p>
+      <p>
+        Every code on this site comes from one structured database, so the tables, the
+        <a href="/tools/cheat-finder/">Cheat Finder</a>, the <a href="/tools/cheat-trainer/">Combo Trainer</a> and the
+        <a href="/tools/cheat-roulette/">Cheat Roulette</a> always agree. Xbox and Switch combos are converted from the
+        PlayStation layout button for button, which is how the games map them.
+      </p>
+    </div>
+    <div class="home-faq">
+      <h2 class="display">Quick answers</h2>
+      {
+        homeFaqs.map((f, i) => (
+          <details open={i === 0}>
+            <summary>
+              <h3>{f.q}</h3>
+            </summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding: 64px 0 56px;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  h1 {
+    font-size: clamp(52px, 8.5vw, 104px);
+    margin: 16px 0 20px;
+  }
+  .lede {
+    font-size: 19px;
+    color: #cfcee0;
+    max-width: 560px;
+    margin: 0 0 26px;
+  }
+  .hero-search {
+    display: flex;
+    gap: 8px;
+    max-width: 560px;
+    padding: 6px;
+    border-radius: 999px;
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+  }
+  .hero-search:focus-within {
+    border-color: var(--muted);
+  }
+  .hero-search input {
+    flex: 1;
+    min-width: 0;
+    padding: 0 16px;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: var(--text);
+    font: 500 16px var(--font-body);
+  }
+  .hint {
+    margin: 14px 0 0;
+    font-size: 14px;
+    color: var(--dim);
+  }
+  kbd {
+    font-family: var(--font-mono);
+    color: var(--sun);
+    border: 1px solid var(--line-2);
+    border-radius: 5px;
+    padding: 1px 6px;
+    font-size: 13px;
+  }
+  .demo {
+    perspective: 1200px;
+  }
+  .demo-screen {
+    position: relative;
+    padding: 26px;
+    border-radius: 22px;
+    border: 1px solid var(--line-2);
+    background:
+      linear-gradient(160deg, rgba(255, 46, 136, 0.18), transparent 50%),
+      linear-gradient(0deg, rgba(255, 176, 0, 0.12), transparent 60%),
+      #0b0b15;
+    box-shadow: var(--shadow), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+    transform: rotateY(-8deg) rotateX(4deg);
+    overflow: hidden;
+  }
+  .demo-screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px);
+    pointer-events: none;
+  }
+  .demo-hud {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-display);
+    font-size: 22px;
+  }
+  .demo-money {
+    color: #6fe08a;
+  }
+  .demo-stars {
+    color: #fff;
+    letter-spacing: 2px;
+    animation: stars 4.8s infinite;
+  }
+  .demo-label {
+    margin: 30px 0 4px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--sun);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .demo-name {
+    margin: 0 0 18px;
+    font-family: var(--font-display);
+    font-size: 34px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .demo-seq :global(.bt) {
+    animation: press 4.8s infinite;
+    opacity: 0.35;
+  }
+  .demo-done {
+    margin: 22px 0 0;
+    font-family: var(--font-display);
+    font-size: 30px;
+    text-transform: uppercase;
+    color: var(--sun);
+    opacity: 0;
+    animation: done 4.8s infinite;
+  }
+  /* sequential button presses */
+  .demo-seq :global(.bt:nth-child(1)) { animation-delay: 0s; }
+  .demo-seq :global(.bt:nth-child(2)) { animation-delay: 0.2s; }
+  .demo-seq :global(.bt:nth-child(3)) { animation-delay: 0.4s; }
+  .demo-seq :global(.bt:nth-child(4)) { animation-delay: 0.6s; }
+  .demo-seq :global(.bt:nth-child(5)) { animation-delay: 0.8s; }
+  .demo-seq :global(.bt:nth-child(6)) { animation-delay: 1s; }
+  .demo-seq :global(.bt:nth-child(7)) { animation-delay: 1.2s; }
+  .demo-seq :global(.bt:nth-child(8)) { animation-delay: 1.4s; }
+  .demo-seq :global(.bt:nth-child(9)) { animation-delay: 1.6s; }
+  .demo-seq :global(.bt:nth-child(10)) { animation-delay: 1.8s; }
+  .demo-seq :global(.bt:nth-child(11)) { animation-delay: 2s; }
+  .demo-seq :global(.bt:nth-child(12)) { animation-delay: 2.2s; }
+  @keyframes press {
+    0% { opacity: 0.35; transform: none; }
+    3% { opacity: 1; transform: translateY(-4px) scale(1.12); border-color: var(--sun); }
+    8%, 85% { opacity: 1; transform: none; }
+    100% { opacity: 0.35; }
+  }
+  @keyframes done {
+    0%, 52% { opacity: 0; transform: scale(0.9); }
+    56%, 88% { opacity: 1; transform: none; }
+    100% { opacity: 0; }
+  }
+  @keyframes stars {
+    0%, 52% { color: #fff; }
+    56%, 100% { color: #2c2c42; }
+  }
+  .block {
+    margin-top: 80px;
+  }
+  .block-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+  .block-head h2 {
+    font-size: clamp(34px, 5vw, 54px);
+    margin: 0;
+  }
+  .block-head a {
+    font-size: 15px;
+    white-space: nowrap;
+  }
+  .games {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  .game {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px 18px;
+    min-height: 250px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background:
+      radial-gradient(240px 140px at 100% 0, color-mix(in srgb, var(--gx) 24%, transparent), transparent 70%),
+      var(--panel);
+    color: var(--text);
+    text-decoration: none;
+    transition: transform 0.18s, border-color 0.18s;
+  }
+  .game:hover {
+    transform: translateY(-4px);
+    border-color: var(--line-2);
+    color: var(--text);
+  }
+  .game-year {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gx);
+  }
+  .game-name {
+    font-size: 34px;
+  }
+  .game-blurb {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .game-foot {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--dim);
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+  }
+  .game-foot strong {
+    color: var(--text);
+  }
+  .more-games {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .more-games a {
+    display: flex;
+    flex-direction: column;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    color: var(--text);
+    text-decoration: none;
+    font-size: 15px;
+  }
+  .more-games a:hover {
+    border-color: var(--muted);
+  }
+  .more-games span {
+    font-size: 12.5px;
+    color: var(--dim);
+  }
+  .feat {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .feat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text);
+    text-decoration: none;
+  }
+  .feat-card:hover {
+    border-color: var(--line-2);
+    color: var(--text);
+  }
+  .feat-game {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gx);
+  }
+  .feat-card strong {
+    font-size: 19px;
+  }
+  .feat-eff {
+    font-size: 14px;
+    color: var(--muted);
+    flex: 1;
+  }
+  .feat-code {
+    margin-top: 6px;
+  }
+  .feat-pc {
+    font-size: 13px;
+    color: var(--dim);
+  }
+  .tools {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .tool {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 26px;
+    border-radius: 18px;
+    border: 1px solid var(--line-2);
+    background: linear-gradient(160deg, rgba(255, 46, 136, 0.12), transparent 60%), var(--panel);
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 15px;
+    transition: transform 0.18s, border-color 0.18s;
+  }
+  .tool:hover {
+    transform: translateY(-4px);
+    border-color: var(--muted);
+    color: var(--muted);
+  }
+  .tool-icon {
+    font-size: 30px;
+  }
+  .tool strong {
+    color: var(--text);
+    font-size: 32px;
+  }
+  .tool-go {
+    margin-top: auto;
+    color: var(--sun);
+    font-weight: 700;
+  }
+  .guides {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .guide {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .guide:hover {
+    border-color: var(--line-2);
+    color: var(--muted);
+  }
+  .guide strong {
+    color: var(--text);
+    font-size: 17px;
+    line-height: 1.3;
+  }
+  .guide .kicker {
+    font-size: 11px;
+  }
+  .intro {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  .intro .prose h2 {
+    margin-top: 0;
+  }
+  .home-faq h2 {
+    font-size: 36px;
+    margin: 0 0 16px;
+  }
+  .home-faq details {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel);
+    margin-bottom: 10px;
+  }
+  .home-faq summary {
+    cursor: pointer;
+    padding: 14px 18px;
+    list-style: none;
+  }
+  .home-faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .home-faq h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+  .home-faq p {
+    margin: 0;
+    padding: 0 18px 16px;
+    color: #cfcee0;
+    font-size: 15px;
+  }
+  @media (max-width: 1020px) {
+    .hero-grid,
+    .intro {
+      grid-template-columns: 1fr;
+    }
+    .games {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .more-games {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .feat,
+    .tools,
+    .guides {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .demo-screen {
+      transform: none;
+    }
+  }
+  @media (max-width: 640px) {
+    .hero {
+      padding: 40px 0;
+    }
+    .games,
+    .feat,
+    .tools,
+    .guides {
+      grid-template-columns: 1fr;
+    }
+    .game {
+      min-height: 0;
+    }
+    .block-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .hero-search .btn {
+      padding: 12px 14px;
+    }
+  }
+</style>

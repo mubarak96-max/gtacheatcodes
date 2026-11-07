@@ -1,0 +1,148 @@
+---
+import Logo from './Logo.astro';
+import { SITE } from '../lib/site';
+const year = new Date().getFullYear();
+const cols = [
+  {
+    h: 'Cheats by game',
+    links: [
+      ['/gta-5-cheats/', 'GTA 5 cheats'],
+      ['/gta-san-andreas-cheats/', 'San Andreas cheats'],
+      ['/gta-vice-city-cheats/', 'Vice City cheats'],
+      ['/gta-4-cheats/', 'GTA 4 cheats'],
+      ['/gta-3-cheats/', 'GTA 3 cheats'],
+      ['/gta-trilogy-definitive-edition-cheats/', 'Definitive Edition'],
+      ['/gta-6-cheats/', 'GTA 6 cheats'],
+    ],
+  },
+  {
+    h: 'Popular',
+    links: [
+      ['/guides/gta-5-phone-cheats/', 'GTA 5 phone numbers'],
+      ['/guides/gta-san-andreas-jetpack-cheat/', 'SA jetpack cheat'],
+      ['/guides/gta-5-money-cheat/', 'GTA 5 money cheat'],
+      ['/guides/gta-san-andreas-money-cheat/', 'HESOYAM explained'],
+      ['/guides/best-gta-cheats-of-all-time/', 'Best GTA cheats ever'],
+      ['/guides/gta-online-cheats/', 'GTA Online cheats'],
+    ],
+  },
+  {
+    h: 'Tools',
+    links: [
+      ['/tools/cheat-finder/', 'Cheat Finder'],
+      ['/tools/cheat-trainer/', 'Combo Trainer'],
+      ['/tools/cheat-roulette/', 'Cheat Roulette'],
+      ['/guides/', 'All guides'],
+      ['/about/', 'About & methodology'],
+      ['/privacy/', 'Privacy'],
+    ],
+  },
+];
+---
+
+<footer class="site-footer">
+  <div class="wrap grid">
+    <div class="about">
+      <a href="/" class="brand"><Logo size={40} /><span class="display">GTA<span class="grad-text">Cheats</span></span></a>
+      <p>{SITE.tagline} Every code lives in one structured database, so every page, table and tool shows the same codes.</p>
+      <p class="tip">Pro tip: type <kbd>HESOYAM</kbd> on any page.</p>
+    </div>
+    {
+      cols.map((c) => (
+        <div>
+          <p class="h">{c.h}</p>
+          <ul>
+            {c.links.map(([href, label]) => (
+              <li>
+                <a href={href}>{label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+  <div class="wrap legal">
+    <p>
+      © {year} {SITE.name}. An unofficial fan resource. Grand Theft Auto and all related names are trademarks of Take-Two
+      Interactive Software. This site is not affiliated with or endorsed by Rockstar Games or Take-Two. Cheats are for
+      single-player only.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 100px;
+    border-top: 1px solid var(--line);
+    background: var(--bg-2);
+    padding: 56px 0 28px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    gap: 36px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 28px;
+  }
+  .about p {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 380px;
+  }
+  .tip kbd {
+    font-family: var(--font-mono);
+    color: var(--sun);
+    border: 1px solid var(--line-2);
+    border-radius: 5px;
+    padding: 1px 6px;
+  }
+  .h {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sun);
+    margin: 6px 0 12px;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  li {
+    margin: 7px 0;
+  }
+  li a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 15px;
+  }
+  li a:hover {
+    color: var(--hot);
+  }
+  .legal {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+  .legal p {
+    color: var(--dim);
+    font-size: 13px;
+    margin: 0;
+  }
+  @media (max-width: 860px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .about {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

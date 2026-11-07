@@ -1,5 +1,12 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import react from '@astrojs/react';
 
-// https://astro.build/config
-export default defineConfig({});
+// `site` is the production domain: it drives canonical
+// URLs, Open Graph tags, the sitemap and llms.txt.
+export default defineConfig({
+  site: 'https://gtacheatcodes.xyz',
+  trailingSlash: 'ignore',
+  integrations: [react()],
+  build: { format: 'directory' },
+});

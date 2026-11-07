@@ -1,0 +1,36 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Privacy Policy"
+  description="How GTA Cheat Codes handles data: there are no accounts, and saved cheats and trainer scores stay in your own browser storage."
+>
+  <article class="wrap page">
+    <p class="kicker">Privacy</p>
+    <h1 class="display">Privacy policy</h1>
+    <div class="prose">
+      <p>This site has no accounts and no sign-up. The interactive tools keep a few things in your browser's local storage so they work next time:</p>
+      <ul>
+        <li>Cheats you save with the star button.</li>
+        <li>Combo Trainer personal bests and streaks.</li>
+        <li>Your Cheat Roulette spin count, and the "wanted level" stars, which count pages viewed this session.</li>
+      </ul>
+      <p>This data never leaves your device. Clear your browser's site data to remove it.</p>
+      <p>
+        Fonts load from Google Fonts, which receives standard request information such as your IP address. If analytics
+        or advertising are added later, this page will be updated first.
+      </p>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .page {
+    padding-top: 48px;
+  }
+  h1 {
+    font-size: clamp(44px, 6vw, 72px);
+    margin: 12px 0;
+  }
+</style>

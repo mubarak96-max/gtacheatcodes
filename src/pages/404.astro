@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Wasted: page not found" description="This page does not exist." noindex>
+  <section class="wrap nf">
+    <p class="display wasted">Wasted</p>
+    <p class="lede">This page took a wrong turn. Try the Cheat Finder or head back to base.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="/tools/cheat-finder/">Search cheats</a>
+      <a class="btn" href="/">Home</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    text-align: center;
+    padding: 100px 20px;
+  }
+  .wasted {
+    font-size: clamp(80px, 16vw, 180px);
+    color: #e0213f;
+    text-shadow: 0 0 40px rgba(224, 33, 63, 0.45);
+    margin: 0;
+  }
+  .lede {
+    color: var(--muted);
+    font-size: 19px;
+  }
+  .actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+</style>

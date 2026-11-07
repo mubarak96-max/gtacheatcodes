@@ -1,0 +1,191 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../lib/site';
+import { CHEATS, GAMES } from '../data/games';
+import type { GameKey } from '../data/types';
+
+interface Props {
+  title: string;
+  description: string;
+  /** JSON-LD objects to emit. */
+  schema?: Record<string, unknown>[];
+  ogType?: 'website' | 'article';
+  noindex?: boolean;
+  accent?: string;
+  publishDate?: Date;
+  updatedDate?: Date;
+}
+
+const { title, description, schema = [], ogType = 'website', noindex = false, accent, publishDate, updatedDate } =
+  Astro.props;
+
+// Always canonicalise to the trailing-slash form, whichever URL variant was requested.
+const path = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const canonical = new URL(path, Astro.site).href;
+const ogImage = new URL('/og.png', Astro.site).href;
+const fullTitle = title.includes(SITE.name) ? title : `${title} | ${SITE.name}`;
+
+// Every typed PC code across the classic games, for the "type a cheat anywhere" easter egg.
+const typeable = (Object.keys(CHEATS) as GameKey[]).flatMap((g) =>
+  CHEATS[g].flatMap((c) =>
+    [c.pc, c.pcAlt]
+      .filter((code): code is string => !!code && code.length >= 5)
+      .map((code) => ({ code, name: c.name, game: GAMES[g].short, href: GAMES[g].hub }))
+  )
+);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    {!noindex && <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
+    <meta name="google-site-verification" content="RB7pmYs9FgcjeUIBe55PnOd4_p82uf99F3m4sG4vXic" />
+    <meta name="theme-color" content="#07070d" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="sitemap" href="/sitemap.xml" />
+    <link rel="alternate" type="text/plain" title="LLM summary" href="/llms.txt" />
+
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content={SITE.locale} />
+    {publishDate && <meta property="article:published_time" content={publishDate.toISOString()} />}
+    {updatedDate && <meta property="article:modified_time" content={updatedDate.toISOString()} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+    />
+
+    {schema.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+  </head>
+  <body style={accent ? `--accent:${accent}` : undefined}>
+    <a class="skip" href="#main">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+
+    <div id="cheat-toast" class="toast" role="status" aria-live="polite" hidden>
+      <span class="toast-tag">Cheat activated</span>
+      <strong class="toast-name"></strong>
+      <a class="toast-link" href="#">See all codes →</a>
+    </div>
+
+    <script is:inline define:vars={{ typeable }}>
+      // Type any classic PC cheat (HESOYAM, PANZER, PAINKILLER...) anywhere on the site.
+      (function () {
+        var buf = '';
+        var max = 0;
+        typeable.forEach(function (t) { if (t.code.length > max) max = t.code.length; });
+        var toast = document.getElementById('cheat-toast');
+        var timer;
+        document.addEventListener('keydown', function (e) {
+          var el = e.target;
+          if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) return;
+          if (e.key.length !== 1 || !/[a-z0-9]/i.test(e.key)) return;
+          buf = (buf + e.key.toUpperCase()).slice(-max);
+          for (var i = 0; i < typeable.length; i++) {
+            var t = typeable[i];
+            if (buf.slice(-t.code.length) === t.code) {
+              buf = '';
+              toast.querySelector('.toast-name').textContent = t.name + ' · ' + t.game;
+              toast.querySelector('.toast-link').setAttribute('href', t.href);
+              toast.hidden = false;
+              toast.classList.remove('show');
+              void toast.offsetWidth;
+              toast.classList.add('show');
+              clearTimeout(timer);
+              timer = setTimeout(function () { toast.classList.remove('show'); }, 4200);
+              try {
+                var n = Number(localStorage.getItem('gtacc:typed') || '0') + 1;
+                localStorage.setItem('gtacc:typed', String(n));
+              } catch (_) {}
+              break;
+            }
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
+
+<style>
+  .skip {
+    position: absolute;
+    left: -9999px;
+    top: 8px;
+    z-index: 100;
+    background: var(--sun);
+    color: #000;
+    padding: 8px 14px;
+    border-radius: 6px;
+  }
+  .skip:focus {
+    left: 8px;
+  }
+  main {
+    display: block;
+    min-height: 60vh;
+  }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 260px;
+    max-width: calc(100vw - 32px);
+    padding: 16px 24px;
+    border-radius: 14px;
+    background: rgba(10, 10, 18, 0.94);
+    border: 1px solid var(--line-2);
+    box-shadow: var(--shadow);
+    text-align: center;
+    transform: translate(-50%, 140%);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 0.25s;
+  }
+  .toast:global(.show) {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  .toast-tag {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    font-size: 26px;
+    letter-spacing: 0.02em;
+    color: var(--sun);
+    line-height: 1;
+  }
+  .toast-name {
+    font-size: 15px;
+  }
+  .toast-link {
+    font-size: 13px;
+  }
+</style>
